@@ -1,58 +1,161 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Task API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A small, production-style REST API for a team task tracker, built with **Laravel 13**, **Sanctum** token auth and a full **PHPUnit** feature test suite. Users create projects, invite teammates, and track tasks with filtering, search and sorting.
 
-## About Laravel
+It is a portfolio project: the domain is deliberately simple so the code can show how I structure a real API — versioned routes, form requests, API resources, policies, enums and tests that cover the failure cases, not just the happy path.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![API docs: list tasks endpoint](docs/screenshots/api-docs-list-tasks.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Highlights
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Token auth with Sanctum** — register, log in (rate limited to 5 attempts/minute per email + IP), log out of the current device only.
+- **Versioned API** under `/api/v1`, every response shaped by an Eloquent API Resource.
+- **Authorization in policies**, with non-members getting `404` rather than `403` so project and task ids never leak to outsiders.
+- **Nested, scoped routes** — `/projects/{project}/tasks/{task}` returns `404` if the task belongs to a different project.
+- **Filtering, search and sorting** validated by a form request: whitelisted sort keys (no SQL injection through `?sort=`), `LIKE` wildcards in search treated literally, priority sorted by weight rather than alphabetically, undated tasks sorted last.
+- **Small domain rules kept close to the model** — `completed_at` follows the task status; removing a member unassigns their tasks in that project only.
+- **Auto-generated OpenAPI docs** with [Scramble](https://scramble.dedoc.co), read straight from the form requests and resources.
+- **78 feature tests**, Pint code style and GitHub Actions CI on PHP 8.4 and 8.5.
 
-## Learning Laravel
+## Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| | |
+| --- | --- |
+| Language | PHP 8.4+ |
+| Framework | Laravel 13 |
+| Auth | Laravel Sanctum (personal access tokens) |
+| Database | SQLite by default; MySQL or PostgreSQL work unchanged |
+| Tests | PHPUnit 12, in-memory SQLite |
+| Docs | Scramble (OpenAPI 3.1) |
+| CI | GitHub Actions — Pint + PHPUnit matrix |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Running it locally
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Requirements: PHP 8.4+ with `pdo_sqlite`, and Composer.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <this-repo-url> task-api && cd task-api
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+The seeder creates a demo account — **demo@example.com / password** — with two projects and twenty tasks.
 
-## Contributing
+Interactive API docs are then at <http://localhost:8000/docs/api> (shown in the local environment only).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Running the tests
 
-## Code of Conduct
+```bash
+php artisan test
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+vendor/bin/pint --test
+```
 
-## Security Vulnerabilities
+## Using the API
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Get a token:
 
-## License
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Accept: application/json" \
+  -d email=demo@example.com -d password=password -d device_name=cli
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Then send it as a bearer token. For example, the highest-priority overdue tasks in a project:
+
+```bash
+curl "http://localhost:8000/api/v1/projects/1/tasks?overdue=1&sort=-priority" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer <token>"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": 11,
+      "project_id": 1,
+      "title": "Fix login timeout on slow networks",
+      "description": null,
+      "status": "todo",
+      "priority": "high",
+      "due_on": "2026-10-27",
+      "is_overdue": true,
+      "completed_at": null,
+      "creator": { "id": 1, "name": "Demo User", "email": "demo@example.com" },
+      "assignee": null,
+      "created_at": "2026-10-30T23:32:42.000000Z",
+      "updated_at": "2026-10-30T23:32:42.000000Z"
+    }
+  ],
+  "links": { "...": "..." },
+  "meta": { "current_page": 1, "per_page": 20, "total": 3, "...": "..." }
+}
+```
+
+### Endpoints
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| `POST` | `/api/v1/auth/register` | Returns a token, `201` |
+| `POST` | `/api/v1/auth/login` | Rate limited |
+| `POST` | `/api/v1/auth/logout` | Revokes the current token only |
+| `GET` | `/api/v1/me` | The signed-in user |
+| `GET` `POST` | `/api/v1/projects` | Projects you belong to / create one |
+| `GET` `PATCH` `DELETE` | `/api/v1/projects/{project}` | Update and delete are owner only |
+| `GET` `POST` | `/api/v1/projects/{project}/members` | Add a member by email (owner only) |
+| `DELETE` | `/api/v1/projects/{project}/members/{user}` | Unassigns their tasks in the project |
+| `GET` `POST` | `/api/v1/projects/{project}/tasks` | Filters below |
+| `GET` `PATCH` `DELETE` | `/api/v1/projects/{project}/tasks/{task}` | Delete: creator or project owner |
+
+Task list query parameters:
+
+| Parameter | Values |
+| --- | --- |
+| `status` | `todo`, `in_progress`, `done` |
+| `priority` | `low`, `medium`, `high` |
+| `assignee` | `me`, `none`, or a user id |
+| `overdue` | `1` — open tasks past their due date |
+| `search` | Text in the title |
+| `sort` | `created_at`, `due_on`, `priority`, `title`; prefix `-` for descending (default `-created_at`) |
+| `per_page` | 1–100 (default 20) |
+
+## Project layout
+
+```
+app/
+├── Enums/                      TaskStatus, TaskPriority
+├── Http/
+│   ├── Controllers/Api/V1/     Auth, Project, ProjectMember, Task
+│   ├── Requests/Api/V1/        Validation for every write and for list filters
+│   └── Resources/V1/           JSON shape of every response
+├── Models/                     User, Project, Task
+└── Policies/                   ProjectPolicy, TaskPolicy
+tests/Feature/
+├── Http/Controllers/Api/V1/    One test class per controller
+├── Models/                     Task status and overdue rules
+└── Policies/                   Full permission matrix per policy
+```
+
+## Design notes
+
+- **404 for outsiders, 403 for members.** A member who lacks a permission learns why (`403` with a message); someone outside the project cannot tell whether it exists.
+- **Policies are tested directly** as a permission matrix, and each endpoint has one HTTP test showing it actually calls the policy.
+- **Mass assignment is covered by tests**: sending `owner_id`, `creator_id`, `project_id` or `email_verified_at` in a payload has no effect.
+- **No N+1 queries** on list endpoints — relations are eager loaded and counts use `withCount`.
+
+## More screenshots
+
+| Overview | Task schema |
+| --- | --- |
+| ![API docs overview](docs/screenshots/api-docs-overview.png) | ![Task resource schema](docs/screenshots/api-docs-task-resource.png) |
+
+## Licence
+
+MIT
