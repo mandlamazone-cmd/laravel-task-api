@@ -34,7 +34,7 @@ It is a portfolio project: the domain is deliberately simple so the code can sho
 Requirements: PHP 8.4+ with `pdo_sqlite`, and Composer.
 
 ```bash
-git clone <this-repo-url> task-api && cd task-api
+git clone https://github.com/mandlamazone-cmd/laravel-task-api.git && cd laravel-task-api
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -158,4 +158,4 @@ tests/Feature/
 
 ## Licence
 
-MIT
+MIT — see [LICENSE](LICENSE).
