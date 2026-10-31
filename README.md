@@ -1,5 +1,7 @@
 # Task API
 
+[![tests](https://github.com/mandlamazone-cmd/laravel-task-api/actions/workflows/tests.yml/badge.svg)](https://github.com/mandlamazone-cmd/laravel-task-api/actions/workflows/tests.yml) ![PHP 8.4+](https://img.shields.io/badge/PHP-8.4%2B-777bb4) ![Laravel 13](https://img.shields.io/badge/Laravel-13-ff2d20) ![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
 A small, production-style REST API for a team task tracker, built with **Laravel 13**, **Sanctum** token auth and a full **PHPUnit** feature test suite. Users create projects, invite teammates, and track tasks with filtering, search and sorting.
 
 It is a portfolio project: the domain is deliberately simple so the code can show how I structure a real API — versioned routes, form requests, API resources, policies, enums and tests that cover the failure cases, not just the happy path.
