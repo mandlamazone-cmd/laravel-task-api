@@ -1,12 +1,18 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "portfolio/task-api",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "A team task tracker REST API built with Laravel 13, Sanctum and PHPUnit.",
+    "keywords": [
+        "laravel",
+        "rest-api",
+        "sanctum",
+        "phpunit",
+        "portfolio"
+    ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "dedoc/scramble": "^0.13.52",
         "laravel/framework": "^13.17",
         "laravel/sanctum": "^4.0",

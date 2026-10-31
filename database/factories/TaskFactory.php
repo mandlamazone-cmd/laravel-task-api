@@ -24,7 +24,12 @@ class TaskFactory extends Factory
         return [
             'project_id' => Project::factory(),
             'creator_id' => fn (array $attributes) => Project::find($attributes['project_id'])->owner_id,
-            'title' => fake()->sentence(4),
+            'title' => fake()->randomElement([
+                'Write release notes', 'Fix login timeout on slow networks', 'Design empty states',
+                'Review pull request backlog', 'Add CSV export', 'Set up error monitoring',
+                'Update onboarding emails', 'Benchmark search endpoint', 'Draft Q4 roadmap',
+                'Migrate images to object storage', 'Write API rate limit docs', 'Plan user interviews',
+            ]),
             'description' => fake()->optional()->paragraph(),
             'status' => TaskStatus::Todo,
             'priority' => TaskPriority::Medium,

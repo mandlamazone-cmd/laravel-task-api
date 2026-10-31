@@ -16,6 +16,9 @@ use Illuminate\Validation\ValidationException;
 
 class ProjectMemberController extends Controller
 {
+    /**
+     * List the project's members by name.
+     */
     public function index(Project $project): AnonymousResourceCollection
     {
         Gate::authorize('view', $project);
@@ -24,7 +27,7 @@ class ProjectMemberController extends Controller
     }
 
     /**
-     * Add an existing user to the project by email.
+     * Add an existing user to the project by email (owner only).
      */
     public function store(AddProjectMemberRequest $request, Project $project): JsonResponse
     {
@@ -36,7 +39,7 @@ class ProjectMemberController extends Controller
     }
 
     /**
-     * Remove a member and unassign their open tasks in this project.
+     * Remove a member and unassign their tasks in this project (owner only).
      */
     public function destroy(Project $project, User $user): Response
     {

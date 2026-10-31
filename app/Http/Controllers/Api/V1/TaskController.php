@@ -50,6 +50,9 @@ class TaskController extends Controller
         return TaskResource::collection($tasks);
     }
 
+    /**
+     * Create a task in the project.
+     */
     public function store(StoreTaskRequest $request, Project $project): JsonResponse
     {
         Gate::authorize('view', $project);
@@ -63,6 +66,9 @@ class TaskController extends Controller
             ->setStatusCode(201);
     }
 
+    /**
+     * Show a single task.
+     */
     public function show(Project $project, Task $task): TaskResource
     {
         Gate::authorize('view', $task);
@@ -70,6 +76,9 @@ class TaskController extends Controller
         return new TaskResource($task->load(['creator', 'assignee']));
     }
 
+    /**
+     * Update a task; setting the status to done records completed_at.
+     */
     public function update(UpdateTaskRequest $request, Project $project, Task $task): TaskResource
     {
         Gate::authorize('update', $task);
@@ -79,6 +88,9 @@ class TaskController extends Controller
         return new TaskResource($task->load(['creator', 'assignee']));
     }
 
+    /**
+     * Delete a task (its creator or the project owner only).
+     */
     public function destroy(Project $project, Task $task): Response
     {
         Gate::authorize('delete', $task);

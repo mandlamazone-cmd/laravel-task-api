@@ -42,6 +42,9 @@ class ProjectController extends Controller
             ->setStatusCode(201);
     }
 
+    /**
+     * Show a project with its owner, members and open task count.
+     */
     public function show(Project $project): ProjectResource
     {
         Gate::authorize('view', $project);
@@ -49,6 +52,9 @@ class ProjectController extends Controller
         return new ProjectResource($project->load('owner', 'members')->loadCount('openTasks'));
     }
 
+    /**
+     * Rename a project or change its description (owner only).
+     */
     public function update(UpdateProjectRequest $request, Project $project): ProjectResource
     {
         Gate::authorize('update', $project);
@@ -59,7 +65,7 @@ class ProjectController extends Controller
     }
 
     /**
-     * Delete a project and all of its tasks.
+     * Delete a project and all of its tasks (owner only).
      */
     public function destroy(Project $project): Response
     {
