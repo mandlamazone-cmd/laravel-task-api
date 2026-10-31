@@ -14,17 +14,25 @@ class ProjectPolicyTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * @return array<string, array{string, bool, bool, bool}>
+     * @return array<string, array{string, bool, bool}>
      */
     public static function abilityMatrix(): array
     {
-        // ability => [ability, owner allowed, member allowed, member gets 403 (not 404)]
+        // ability => [ability, owner allowed, member allowed]
         return [
-            'view' => ['view', true, true, false],
-            'update' => ['update', true, false, true],
-            'delete' => ['delete', true, false, true],
-            'manage members' => ['manageMembers', true, false, true],
+            'view' => ['view', true, true],
+            'update' => ['update', true, false],
+            'delete' => ['delete', true, false],
+            'manage members' => ['manageMembers', true, false],
         ];
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function abilities(): array
+    {
+        return collect(self::abilityMatrix())->map(fn (array $row) => [$row[0]])->all();
     }
 
     #[DataProvider('abilityMatrix')]
@@ -38,7 +46,7 @@ class ProjectPolicyTest extends TestCase
         $this->assertSame($memberAllowed, $policy->{$ability}($member, $project)->allowed());
     }
 
-    #[DataProvider('abilityMatrix')]
+    #[DataProvider('abilities')]
     public function test_outsiders_are_denied_as_not_found_for_every_ability(string $ability): void
     {
         $project = Project::factory()->create();
