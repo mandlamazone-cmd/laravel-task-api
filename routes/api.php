@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\ProjectMemberController;
+use App\Http\Controllers\Api\V1\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('v1.')->group(function () {
@@ -18,5 +19,9 @@ Route::prefix('v1')->name('v1.')->group(function () {
         Route::get('projects/{project}/members', [ProjectMemberController::class, 'index'])->name('projects.members.index');
         Route::post('projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
         Route::delete('projects/{project}/members/{user}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
+
+        Route::scopeBindings()->group(function () {
+            Route::apiResource('projects.tasks', TaskController::class);
+        });
     });
 });

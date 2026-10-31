@@ -17,6 +17,16 @@ class Task extends Model
     use HasFactory;
 
     /**
+     * Default attribute values, mirrored from the table defaults.
+     *
+     * @var array<string, string>
+     */
+    protected $attributes = [
+        'status' => 'todo',
+        'priority' => 'medium',
+    ];
+
+    /**
      * Keep completed_at in step with the status.
      */
     protected static function booted(): void
