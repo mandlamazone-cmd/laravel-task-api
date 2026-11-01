@@ -4,6 +4,8 @@
 
 A small, production-style REST API for a team task tracker, built with **Laravel 13**, **Sanctum** token auth and a full **PHPUnit** feature test suite. Users create projects, invite teammates, and track tasks with filtering, search and sorting.
 
+There is a matching mobile app: [**task-api-mobile**](https://github.com/mandlamazone-cmd/task-api-mobile), an Expo / React Native client for this API.
+
 It is a portfolio project: the domain is deliberately simple so the code can show how I structure a real API — versioned routes, form requests, API resources, policies, enums and tests that cover the failure cases, not just the happy path.
 
 ![API docs: list tasks endpoint](docs/screenshots/api-docs-list-tasks.png)
