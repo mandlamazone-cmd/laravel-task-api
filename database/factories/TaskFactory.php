@@ -30,7 +30,12 @@ class TaskFactory extends Factory
                 'Update onboarding emails', 'Benchmark search endpoint', 'Draft Q4 roadmap',
                 'Migrate images to object storage', 'Write API rate limit docs', 'Plan user interviews',
             ]),
-            'description' => fake()->optional()->paragraph(),
+            'description' => fake()->optional()->randomElement([
+                'Agree the scope with the team first, then split it into smaller tasks if it grows.',
+                'Check the analytics dashboard before and after the change so we can compare.',
+                'Pair with whoever owns this area; they know the edge cases.',
+                'Keep the old behaviour behind a flag until the release is confirmed.',
+            ]),
             'status' => TaskStatus::Todo,
             'priority' => TaskPriority::Medium,
             'due_on' => fake()->optional()->dateTimeBetween('now', '+1 month'),
